@@ -59,6 +59,14 @@ public class Main {
 				if ((i+1) >= args.length) {
 					Util.error("no.classes.specified");
 				}
+				MainDoclet.pch = args[i];
+				continue;
+			} else if (args[i].equals("-namespace")) {
+				i++;
+				if ((i+1) >= args.length) {
+					Util.error("no.classes.specified");
+				}
+				MainDoclet.namespace = args[i];
 				continue;
 			} else if (args[i].equals("-force")) {
 				if ((i+1) >= args.length) {

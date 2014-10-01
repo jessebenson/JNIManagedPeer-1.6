@@ -31,6 +31,7 @@ public class MainDoclet {
 	public static String odir;
 	public static String pch;
 	public static boolean force = false;
+	public static String namespace;
 
 	/**
 	 * Entry point.
@@ -58,6 +59,11 @@ public class MainDoclet {
 		 * Set the precompiled header, if specified.
 		 */
 		generator.setPrecompiledHeader(pch);
+
+		/*
+		 * Set the namespace, if specified.
+		 */
+		generator.setNamespace(namespace);
 
 		/*
 		 * Force set to false will turn off smarts about checking file
@@ -91,8 +97,6 @@ public class MainDoclet {
 	public static int optionLength(String option) {
 		if (option.equals("-d")) {
 			return 2;
-		} else if (option.equals("-pch")) {
-			return 2;
 		} else if (option.equals("-help")) {
 			return 1;
 		} else if (option.equals("--help")) {
@@ -121,8 +125,6 @@ public class MainDoclet {
 		for (int p = 0; p < cmdoptions.length; p++) {
 			if (cmdoptions[p][0].equals("-d")) {
 				odir = cmdoptions[p][1];
-			} else if (cmdoptions[p][0].equals("-pch")) {
-				pch = cmdoptions[p][1];
 			} else if (cmdoptions[p][0].equals("-verbose")) {
 				Util.verbose = true;
 			} else if ((cmdoptions[p][0].equals("-help"))

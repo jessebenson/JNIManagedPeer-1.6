@@ -25,15 +25,12 @@ import com.jni.annotation.JNIMethod;
 import com.sun.javadoc.AnnotationDesc;
 import com.sun.javadoc.AnnotationTypeDoc;
 import com.sun.javadoc.AnnotationTypeElementDoc;
-import com.sun.javadoc.AnnotationValue;
 import com.sun.javadoc.ClassDoc;
-import com.sun.javadoc.FieldDoc;
 import com.sun.javadoc.MethodDoc;
 import com.sun.javadoc.Parameter;
 import com.sun.javadoc.ProgramElementDoc;
 import com.sun.javadoc.RootDoc;
 import com.sun.javadoc.Type;
-import com.sun.javadoc.TypeVariable;
 import com.sun.tools.javah.Gen;
 import com.sun.tools.javah.Mangle;
 import com.sun.tools.javah.TypeSignature;
@@ -202,8 +199,10 @@ public class JNIGenerator extends Gen {
 			//return value.split("\\.");
 		}
 
-		Util.error("JNIClass.does.not.define.namespace", clazz.qualifiedName());
-		return null;
+		// Return the fallback namespace
+		if (namespace == null)
+			return new String[0];
+		return namespace.split("\\.");
 	}
 	
 	protected final String cppNamespaceBegin(String[] namespace) {
@@ -219,7 +218,8 @@ public class JNIGenerator extends Gen {
 		for (int i = 0; i < namespace.length; i++) {
 			buffer.append("}");
 		}
-		buffer.append(" // namespace ");
+		if (namespace.length > 0)
+			buffer.append(" // namespace ");
 		for (int i = 0; i < namespace.length; i++) {
 			buffer.append(namespace[i]);
 			if (i+1 < namespace.length)

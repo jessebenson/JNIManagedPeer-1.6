@@ -63,6 +63,7 @@ public abstract class Gen {
 	 */
 	protected ClassDoc[] classes;
 	protected String pch;
+	protected String namespace; // Fallback namespace
 	static private final boolean isWindows = System.getProperty("os.name").startsWith("Windows");
 
 	public Gen(RootDoc root) {
@@ -112,6 +113,10 @@ public abstract class Gen {
 
 	public void setPrecompiledHeader(String pch) {
 		this.pch = pch;
+	}
+	
+	public void setNamespace(String namespace) {
+		this.namespace = namespace;
 	}
 
 	/*
