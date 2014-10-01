@@ -29,6 +29,7 @@ import java.io.*;
 public class MainDoclet {
 
 	public static String odir;
+	public static String pch;
 	public static boolean force = false;
 
 	/**
@@ -37,10 +38,10 @@ public class MainDoclet {
 	public static boolean start(RootDoc root) {
 
 		// Command line options.
-		String [][] cmdoptions = root.options();
+		String[][] cmdoptions = root.options();
 		// Classes specified on command line.
 		ClassDoc[] classes = root.classes();
-		Gen g = new JNIGenerator(root);
+		Gen generator = new JNIGenerator(root);
 
 		validateOptions(cmdoptions);
 
@@ -51,13 +52,18 @@ public class MainDoclet {
 		/*
 		 * Arrange for output destination.
 		 */
-		g.setOutDir(odir);
+		generator.setOutDir(odir);
+
+		/*
+		 * Set the precompiled header, if specified.
+		 */
+		generator.setPrecompiledHeader(pch);
 
 		/*
 		 * Force set to false will turn off smarts about checking file
 		 * content before writing.
 		 */
-		g.setForce(force);
+		generator.setForce(force);
 
 		if (classes.length == 0) {
 			Util.error("no.classes.specified");
@@ -66,10 +72,10 @@ public class MainDoclet {
 		/*
 		 * Set classes.
 		 */
-		g.setClasses(classes);
+		generator.setClasses(classes);
 
 		try {
-			g.run();
+			generator.run();
 		} catch (ClassNotFoundException cnfe) {
 			Util.error("class.not.found", cnfe.getMessage());
 		} catch (IOException ioe) {
@@ -84,6 +90,8 @@ public class MainDoclet {
 	 */
 	public static int optionLength(String option) {
 		if (option.equals("-d")) {
+			return 2;
+		} else if (option.equals("-pch")) {
 			return 2;
 		} else if (option.equals("-help")) {
 			return 1;
@@ -113,6 +121,8 @@ public class MainDoclet {
 		for (int p = 0; p < cmdoptions.length; p++) {
 			if (cmdoptions[p][0].equals("-d")) {
 				odir = cmdoptions[p][1];
+			} else if (cmdoptions[p][0].equals("-pch")) {
+				pch = cmdoptions[p][1];
 			} else if (cmdoptions[p][0].equals("-verbose")) {
 				Util.verbose = true;
 			} else if ((cmdoptions[p][0].equals("-help"))

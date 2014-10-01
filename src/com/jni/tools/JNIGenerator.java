@@ -19,26 +19,21 @@ package com.jni.tools;
 
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.List;
-
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.ElementFilter;
 
 import com.jni.annotation.JNIClass;
 import com.jni.annotation.JNIMethod;
+import com.sun.javadoc.AnnotationDesc;
+import com.sun.javadoc.AnnotationTypeDoc;
+import com.sun.javadoc.AnnotationTypeElementDoc;
+import com.sun.javadoc.AnnotationValue;
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.FieldDoc;
 import com.sun.javadoc.MethodDoc;
 import com.sun.javadoc.Parameter;
+import com.sun.javadoc.ProgramElementDoc;
 import com.sun.javadoc.RootDoc;
 import com.sun.javadoc.Type;
+import com.sun.javadoc.TypeVariable;
 import com.sun.tools.javah.Gen;
 import com.sun.tools.javah.Mangle;
 import com.sun.tools.javah.TypeSignature;
@@ -85,7 +80,7 @@ public class JNIGenerator extends Gen {
 			/* Write declarations for methods marked with the JNIMethod annotation. */
 			MethodDoc[] classmethods = clazz.methods();
 			for (MethodDoc method : classmethods) {
-				Annotation jniMethod = getAnnotation(clazz, method, JNIMethod.class);
+				AnnotationTypeDoc jniMethod = getAnnotation(method, JNIMethod.class);
 				if (jniMethod != null) {
 					String modifiers = (isStatic(method) ? "static " : "");
 					String returnType = getReturnType(method);
@@ -142,7 +137,7 @@ public class JNIGenerator extends Gen {
 			/* Write definitions for methods marked with the JNIMethod annotation. */
 			MethodDoc[] classmethods = clazz.methods();
 			for (MethodDoc method : classmethods) {
-				Annotation jniMethod = getAnnotation(clazz, method, JNIMethod.class);
+				AnnotationTypeDoc jniMethod = getAnnotation(method, JNIMethod.class);
 				if (jniMethod != null) {
 					String returnType = getReturnType(method);
 					String methodName = getMethodName(method);
@@ -186,31 +181,29 @@ public class JNIGenerator extends Gen {
 		}
 	}
 
-	protected final Annotation getAnnotation(ClassDoc clazz, Class annotation) throws ClassNotFoundException {
-		Class runtimeClazz = Class.forName(clazz.qualifiedName());
-		return runtimeClazz.getAnnotation(annotation);
-	}
-	
-	protected final Annotation getAnnotation(ClassDoc clazz, MethodDoc method, Class annotation) throws ClassNotFoundException {
-		Class runtimeClazz = Class.forName(clazz.qualifiedName());
-		for (Method runtimeMethod : runtimeClazz.getMethods()) {
-			if (runtimeMethod.getName() == method.name()) {
-				return runtimeMethod.getAnnotation(annotation);
+	protected final AnnotationTypeDoc getAnnotation(ProgramElementDoc element, Class annotation) throws ClassNotFoundException {
+		String annotationName = annotation.getName();
+		for (AnnotationDesc atd : element.annotations()) {
+			AnnotationTypeDoc annotationType = atd.annotationType();
+			if (annotationName.equals(annotationType.qualifiedName())) {
+				return annotationType;
 			}
 		}
 		return null;
 	}
 	
 	protected final String[] getNamespace(ClassDoc clazz) throws ClassNotFoundException {
-		JNIClass jniClass = (JNIClass) getAnnotation(clazz, JNIClass.class);
+		AnnotationTypeDoc jniClass = getAnnotation(clazz, JNIClass.class);
 		if (jniClass == null)
 			Util.bug("tried.to.define.non.annotated.class");
-		
-		String namespace = jniClass.value();
-		if (namespace == null)
-			Util.error("JNIClass.does.not.define.namespace", clazz.qualifiedName());
-		
-		return namespace.split("\\.");
+
+		for (AnnotationTypeElementDoc element : jniClass.elements()) {
+			// How do I read the value out of this?
+			//return value.split("\\.");
+		}
+
+		Util.error("JNIClass.does.not.define.namespace", clazz.qualifiedName());
+		return null;
 	}
 	
 	protected final String cppNamespaceBegin(String[] namespace) {
@@ -284,26 +277,26 @@ public class JNIGenerator extends Gen {
 		boolean needsCast = false;
 		boolean needsReturn = true;
 
-		if (returnType == "void") {
+		if (returnType.equals("void")) {
 			baseSignature = "Void";
 			needsReturn = false;
-		} else if (returnType == "jboolean") {
+		} else if (returnType.equals("jboolean")) {
 			baseSignature = "Boolean";
-		} else if (returnType == "jbyte") {
+		} else if (returnType.equals("jbyte")) {
 			baseSignature = "Byte";
-		} else if (returnType == "jchar") {
+		} else if (returnType.equals("jchar")) {
 			baseSignature = "Char";
-		} else if (returnType == "jshort") {
+		} else if (returnType.equals("jshort")) {
 			baseSignature = "Short";
-		} else if (returnType == "jint") {
+		} else if (returnType.equals("jint")) {
 			baseSignature = "Int";
-		} else if (returnType == "jlong") {
+		} else if (returnType.equals("jlong")) {
 			baseSignature = "Long";
-		} else if (returnType == "jfloat") {
+		} else if (returnType.equals("jfloat")) {
 			baseSignature = "Float";
-		} else if (returnType == "jdouble") {
+		} else if (returnType.equals("jdouble")) {
 			baseSignature = "Double";
-		} else if (returnType == "jobject") {
+		} else if (returnType.equals("jobject")) {
 			baseSignature = "Object";
 		} else { // jclass, jstring, jthrowable, or j*Array-types
 			baseSignature = "Object";

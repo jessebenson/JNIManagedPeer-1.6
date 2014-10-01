@@ -17,6 +17,9 @@
 
 package com.jni.tools;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.sun.tools.javah.Util;
 
 public class Main {
@@ -27,7 +30,10 @@ public class Main {
 			Util.usage(1);
 		}
 
+		List<String> javadocargsList = new ArrayList<String>();
 		for (int i = 0; i < args.length; i++) {
+			final int index = i;
+			
 			if (args[i].equals("-d")) {
 				i++;
 				if (i >= args.length) {
@@ -48,6 +54,12 @@ public class Main {
 				if ((i+1) >= args.length) {
 					Util.version();
 				}
+			} else if (args[i].equals("-pch")) {
+				i++;
+				if ((i+1) >= args.length) {
+					Util.error("no.classes.specified");
+				}
+				continue;
 			} else if (args[i].equals("-force")) {
 				if ((i+1) >= args.length) {
 					Util.error("no.classes.specified");
@@ -75,22 +87,22 @@ public class Main {
 			} else {
 				//break; /* The rest must be classes. */
 			}
+			
+			javadocargsList.add(args[index]);
+			if (i != index)
+				javadocargsList.add(args[i]);
 		}
 
 		/* Invoke javadoc */
-
-		String[] javadocargs = new String[args.length + 2];
-		int i = 0;
-
-		for (; i < args.length; i++) {
-			javadocargs[i] = args[i];
+		javadocargsList.add("-private");
+		javadocargsList.add("-Xclasses");
+		
+		String[] javadocargs = new String[javadocargsList.size()];
+		for (int i = 0; i < javadocargs.length; i++) {
+			javadocargs[i] = javadocargsList.get(i);
 		}
 
-		javadocargs[i] = "-private";
-		i++;
-		javadocargs[i] = "-Xclasses";
-
-		int rc = com.sun.tools.javadoc.Main.execute("javadoc", "com.sun.tools.javah.MainDoclet", javadocargs);
+		int rc = com.sun.tools.javadoc.Main.execute("javadoc", "com.jni.tools.MainDoclet", javadocargs);
 		System.exit(rc);
 	}
 }
