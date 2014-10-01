@@ -27,8 +27,11 @@
 package com.sun.tools.javah;
 
 import com.sun.javadoc.*;
+
 import java.io.*;
 import java.util.*;
+
+import javax.lang.model.element.TypeElement;
 
 /**
  * Returns internal type signature.
@@ -67,6 +70,14 @@ public class TypeSignature{
 		return getParamJVMSignature(javasignature);
 	}
 
+	/*
+	 * Returns the type signature of a class according to JVM specs
+	 */
+	public String getTypeSignature(ClassDoc clazz) {
+		String classname = clazz.qualifiedName();
+		return classname.replace('.', '/');
+	}
+	
 	/*
 	 * Returns the type signature of a method according to JVM specs
 	 */
@@ -117,7 +128,7 @@ public class TypeSignature{
 		typeSignature = "(";
 
 		// Gets indivisual internal parameter signature.
-		while(params.isEmpty() != true) {
+		while (params.isEmpty() != true) {
 			paramsig =((String)params.remove(i)).trim();
 			paramJVMSig  = getParamJVMSignature(paramsig);
 			if (paramJVMSig != null) {
@@ -137,7 +148,7 @@ public class TypeSignature{
 		if (dimension != null) {
 
 			//Gets array dimension of return type.
-			while(dimension.indexOf("[]") != -1) {
+			while (dimension.indexOf("[]") != -1) {
 				returnJVMType += "[";
 				int stindex = dimension.indexOf("]") + 1;
 				if (stindex <= dimension.length()) {
@@ -211,10 +222,8 @@ public class TypeSignature{
 					if (classNameDoc == null) {
 						System.out.println("Invalid class type");
 					} else {
-						String classname = classNameDoc.qualifiedName();
-						String newclassname = classname.replace('.', '/');
 						JVMSig += "L";
-						JVMSig += newclassname;
+						JVMSig += getTypeSignature(classNameDoc);
 						JVMSig += ";";
 					}
 				}

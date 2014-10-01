@@ -30,11 +30,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+
 import com.sun.javadoc.*;
+
 import java.io.*;
 import java.util.Stack;
 import java.util.Vector;
 import java.util.Arrays;
+
+import javax.lang.model.element.TypeElement;
+import javax.tools.FileObject;
+import javax.tools.StandardLocation;
 
 
 /**
@@ -50,12 +56,13 @@ import java.util.Arrays;
 public abstract class Gen {
 	protected String lineSeparator = System.getProperty("line.separator");
 
-	RootDoc root;
+	protected RootDoc root;
 
 	/*
 	 * List of classes for which we must generate output.
 	 */
 	protected ClassDoc[] classes;
+	protected String pch;
 	static private final boolean isWindows = System.getProperty("os.name").startsWith("Windows");
 
 	public Gen(RootDoc root) {
@@ -63,10 +70,16 @@ public abstract class Gen {
 	}
 
 	/**
-	 * Override this abstract method, generating content for the named
-	 * class into the outputstream.
+	 * Override this abstract method, generating content for the class declaration (i.e. header)
+	 * of the named class into the outputstream.
 	 */
-	protected abstract void write(OutputStream o, ClassDoc clazz) throws ClassNotFoundException;
+	protected abstract void writeDeclaration(OutputStream o, ClassDoc clazz);
+
+	/**
+	 * Override this abstract method, generating content for the class definition (i.e. cpp)
+	 * of the named class into the outputstream.
+	 */
+	protected abstract void writeDefinition(OutputStream o, ClassDoc clazz);
 
 	/**
 	 * Override this method to provide a list of #include statements
@@ -78,7 +91,6 @@ public abstract class Gen {
 	 * Output location.
 	 */
 	protected String outDir;
-	protected String outFile;
 
 	public void setOutDir(String outDir) {
 		/* Check important, otherwise concatenation of two null strings
@@ -94,12 +106,12 @@ public abstract class Gen {
 		}
 	}
 
-	public void setOutFile(String outFile) {
-		this.outFile = outFile;
-	}
-
 	public void setClasses(ClassDoc[] classes) {
 		this.classes = classes;
+	}
+
+	public void setPrecompiledHeader(String pch) {
+		this.pch = pch;
 	}
 
 	/*
@@ -132,28 +144,37 @@ public abstract class Gen {
 	 *         expr `du -sk` / `ls *.h | wc -l`
 	 */
 	public void run() throws IOException, ClassNotFoundException {
-		if (outFile != null) {
-			/* Everything goes to one big file... */
-			ByteArrayOutputStream bout = new ByteArrayOutputStream(8192);
-			writeFileTop(bout); /* only once */
-
-			for (int i = 0; i < classes.length; i++) {
-				write(bout, classes[i]);
-			}
-
-			writeIfChanged(bout.toByteArray(), outFile);
-		} else {
-			/* Each class goes to its own file... */
-			for (int i = 0; i < classes.length; i++) {
-				ByteArrayOutputStream bout = new ByteArrayOutputStream(8192);
-				writeFileTop(bout);
-				ClassDoc clazz = classes[i];
-				write(bout, clazz);
-				writeIfChanged(bout.toByteArray(), getFileName(clazz.qualifiedName()));
-			}
+		/* Each class goes to its own files... */
+		for (ClassDoc clazz : classes) {
+			/* Write the header file and declaration */
+			writeHeader(clazz);
+			/* Write the cpp file and definition */
+			writeCpp(clazz);
 		}
 	}
 
+	/*
+	 * Generate the declaration for the given type and write it to a C++ header file.
+	 */
+	private void writeHeader(ClassDoc clazz) throws IOException, ClassNotFoundException {
+		String filename = baseFileName(clazz) + ".h";
+		ByteArrayOutputStream bout = new ByteArrayOutputStream(8192);
+		writeHeaderBegin(bout);
+		writeDeclaration(bout, clazz);
+		writeIfChanged(bout.toByteArray(), getFileObject(filename));
+	}
+
+	/*
+	 * Generate the definition for the given type and write it to a C++ code file.
+	 */
+	private void writeCpp(ClassDoc clazz) throws IOException, ClassNotFoundException {
+		String filename = baseFileName(clazz) + ".cpp";
+		ByteArrayOutputStream bout = new ByteArrayOutputStream(8192);
+		writeCppBegin(bout, clazz);
+		writeDefinition(bout, clazz);
+		writeIfChanged(bout.toByteArray(), getFileObject(filename));
+	}
+	
 	/*
 	 * Write the contents of byte[] b to a file named file.  Writing
 	 * is done if either the file doesn't exist or if the contents are
@@ -206,7 +227,6 @@ public abstract class Gen {
 	}
 
 	protected String defineForStatic(ClassDoc c, FieldDoc f) {
-
 		String cnamedoc = c.qualifiedName();
 		String fnamedoc = f.name();
 
@@ -269,58 +289,43 @@ public abstract class Gen {
 	}
 
 	/*
-	 * Deal with the C pre-processor.
-	 */
-	protected String cppGuardBegin() {
-		return "#ifdef __cplusplus" + lineSeparator + "extern \"C\" {" + lineSeparator + "#endif";
-	}
-
-	protected String cppGuardEnd() {
-		return "#ifdef __cplusplus" + lineSeparator + "}" + lineSeparator + "#endif";
-	}
-
-	protected String guardBegin(String cname) {
-		return "/* Header for class " + cname + " */" + lineSeparator + lineSeparator +
-				"#ifndef _Included_" + cname + lineSeparator +
-				"#define _Included_" + cname;
-	}
-
-	protected String guardEnd(String cname) {
-		return "#endif";
-	}
-
-	/*
 	 * File name and file preamble related operations.
 	 */
-	protected void writeFileTop(OutputStream o) {
+	private String getFileTop() {
+		return "/* DO NOT EDIT THIS FILE - it is machine generated */";
+	}
+	
+	private void writeHeaderBegin(OutputStream o) {
 		PrintWriter pw = wrapWriter(o);
-		pw.println("/* DO NOT EDIT THIS FILE - it is machine generated */" + lineSeparator +
-				getIncludes());
+		pw.println(getFileTop());
+		pw.println("#pragma once");
+		pw.println();
+		pw.println(getIncludes());
+		pw.println();
 	}
 
-	protected String baseFileName(String clazz) {
-		StringBuffer f =
-				new StringBuffer(Mangle.mangle(clazz,
-						Mangle.Type.CLASS));
-		if (outDir != null) {
-			f.insert(0, outDir);
-		}
-		return f.toString();
+	private void writeCppBegin(OutputStream o, ClassDoc clazz) {
+		PrintWriter pw = wrapWriter(o);
+		pw.println(getFileTop());
+		if (pch != null)
+			pw.println("#include \"" + pch + "\"");
+		pw.println("#include \"" + baseFileName(clazz) + ".h\"");
+		pw.println();
 	}
 
-	protected String getFileName(String clazz) {
-		return baseFileName(clazz) + getFileSuffix();
+	protected String baseFileName(ClassDoc clazz) {
+		return Mangle.mangle(clazz.simpleTypeName(), Mangle.Type.CLASS);
 	}
 
-	protected String getFileSuffix() {
-		return ".h";
+	private String getFileObject(String filename) {
+		return outDir + filename;
 	}
 
 	/**
 	 * Including super classes' fields.
 	 */
 
-	FieldDoc[] getAllFields(ClassDoc subclazz) throws ClassNotFoundException {
+	public FieldDoc[] getAllFields(ClassDoc subclazz) throws ClassNotFoundException {
 		Vector fields = new Vector();
 		ClassDoc cd = null;
 		Stack s = new Stack();

@@ -19,7 +19,6 @@ package com.jni.tools;
 
 import com.sun.javadoc.*;
 import com.sun.tools.javah.Gen;
-import com.sun.tools.javah.JNI;
 import com.sun.tools.javah.Util;
 
 import java.io.*;
@@ -37,11 +36,11 @@ public class MainDoclet {
 	 */
 	public static boolean start(RootDoc root) {
 
-		//Command line options.
+		// Command line options.
 		String [][] cmdoptions = root.options();
 		// Classes specified on command line.
 		ClassDoc[] classes = root.classes();
-		Gen g = new JNI(root);
+		Gen g = new JNIGenerator(root);
 
 		validateOptions(cmdoptions);
 

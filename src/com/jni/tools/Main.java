@@ -28,31 +28,13 @@ public class Main {
 		}
 
 		for (int i = 0; i < args.length; i++) {
-			if (args[i].equals("-o")) {
-				i++;
-				if (i >= args.length) {
-					Util.usage(1);
-				} else if (args[i].charAt(0) == '-') {
-					Util.error("no.outputfile.specified");
-				} else if ((i+1) >= args.length) {
-					Util.error("no.classes.specified");
-				}
-			} else if (args[i].equals("-d")) {
+			if (args[i].equals("-d")) {
 				i++;
 				if (i >= args.length) {
 					Util.usage(1);
 				} else if (args[i].charAt(0) == '-') {
 					Util.error("no.outputdir.specified");
 				} else if ((i+1) >= args.length) {
-					Util.error("no.classes.specified");
-				}
-			} else if (args[i].equals("-td")) {
-				/* Ignored.  Generate tmp files to memory. */
-				i++;
-				if (i == args.length)
-					Util.usage(1);
-			} else if (args[i].equals("-stubs")) {
-				if ((i+1) >= args.length) {
 					Util.error("no.classes.specified");
 				}
 			} else if (args[i].equals("-v") || args[i].equals("-verbose")) {
