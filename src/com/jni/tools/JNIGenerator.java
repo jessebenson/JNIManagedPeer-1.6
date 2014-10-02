@@ -84,7 +84,7 @@ public class JNIGenerator extends Gen {
 					String methodName = getMethodName(method);
 					String argumentSignature = getArgumentsSignature(method, /*includeTypes:*/ true);
 					
-					pw.println("\t" + modifiers + returnType + " " + methodName + "(" + argumentSignature + ");");
+					pw.println("\t" + modifiers + returnType + " " + methodName + "(" + argumentSignature + ") const;");
 				}
 			}
 
@@ -144,11 +144,11 @@ public class JNIGenerator extends Gen {
 					String methodSignature = typeSignature.getTypeSignature(method.signature(), method.returnType());
 
 					/* Method signature */
-					pw.println(returnType + " " + cname + "::" + methodName + "(" + argumentSignature + ")");
+					pw.println(returnType + " " + cname + "::" + methodName + "(" + argumentSignature + ") const");
 					pw.println("{");
 
 					/* Static variable to compute the jmethodID once on first use */
-					pw.println("\t" + "static jmethodID methodID(GetMethodID(GetClass(), \"" + methodSimpleName + "\", \"" + methodSignature + "\"));");
+					pw.println("\t" + "static jmethodID methodID(Env().GetMethodID(GetClass(), \"" + methodSimpleName + "\", \"" + methodSignature + "\"));");
 
 					/* Generate the code to call the Java method. */
 					pw.print("\t");
