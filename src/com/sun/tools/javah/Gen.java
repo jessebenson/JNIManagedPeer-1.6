@@ -31,16 +31,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 
+import com.jni.annotation.JNIClass;
 import com.sun.javadoc.*;
 
 import java.io.*;
 import java.util.Stack;
 import java.util.Vector;
 import java.util.Arrays;
-
-import javax.lang.model.element.TypeElement;
-import javax.tools.FileObject;
-import javax.tools.StandardLocation;
 
 
 /**
@@ -151,13 +148,27 @@ public abstract class Gen {
 	public void run() throws IOException, ClassNotFoundException {
 		/* Each class goes to its own files... */
 		for (ClassDoc clazz : classes) {
-			/* Write the header file and declaration */
-			writeHeader(clazz);
-			/* Write the cpp file and definition */
-			writeCpp(clazz);
+			if (getAnnotation(clazz, JNIClass.class) != null)
+			{
+				/* Write the header file and declaration */
+				writeHeader(clazz);
+				/* Write the cpp file and definition */
+				writeCpp(clazz);
+			}
 		}
 	}
 
+	public final AnnotationTypeDoc getAnnotation(ProgramElementDoc element, Class annotation) throws ClassNotFoundException {
+		String annotationName = annotation.getName();
+		for (AnnotationDesc atd : element.annotations()) {
+			AnnotationTypeDoc annotationType = atd.annotationType();
+			if (annotationName.equals(annotationType.qualifiedName())) {
+				return annotationType;
+			}
+		}
+		return null;
+	}
+	
 	/*
 	 * Generate the declaration for the given type and write it to a C++ header file.
 	 */

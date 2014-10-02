@@ -180,17 +180,6 @@ public class JNIGenerator extends Gen {
 		}
 	}
 
-	protected final AnnotationTypeDoc getAnnotation(ProgramElementDoc element, Class annotation) throws ClassNotFoundException {
-		String annotationName = annotation.getName();
-		for (AnnotationDesc atd : element.annotations()) {
-			AnnotationTypeDoc annotationType = atd.annotationType();
-			if (annotationName.equals(annotationType.qualifiedName())) {
-				return annotationType;
-			}
-		}
-		return null;
-	}
-	
 	protected final String[] getNamespace(ClassDoc clazz) throws ClassNotFoundException {
 		AnnotationTypeDoc jniClass = getAnnotation(clazz, JNIClass.class);
 		if (jniClass == null)
