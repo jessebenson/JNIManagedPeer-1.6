@@ -82,9 +82,10 @@ public class JNIGenerator extends Gen {
 					String modifiers = (isStatic(method) ? "static " : "");
 					String returnType = getReturnType(method);
 					String methodName = getMethodName(method);
+					String qualifiers = (isStatic(method) ? "" : " const");
 					String argumentSignature = getArgumentsSignature(method, /*includeTypes:*/ true);
 					
-					pw.println("\t" + modifiers + returnType + " " + methodName + "(" + argumentSignature + ") const;");
+					pw.println("\t" + modifiers + returnType + " " + methodName + "(" + argumentSignature + ")" + qualifiers + ";");
 				}
 			}
 
@@ -138,13 +139,14 @@ public class JNIGenerator extends Gen {
 				if (jniMethod != null) {
 					String returnType = getReturnType(method);
 					String methodName = getMethodName(method);
+					String qualifiers = (isStatic(method) ? "" : " const");
 					String argumentSignature = getArgumentsSignature(method, /*includeTypes:*/ true);
 
 					String methodSimpleName = method.name();
 					String methodSignature = typeSignature.getTypeSignature(method.signature(), method.returnType());
 
 					/* Method signature */
-					pw.println(returnType + " " + cname + "::" + methodName + "(" + argumentSignature + ") const");
+					pw.println(returnType + " " + cname + "::" + methodName + "(" + argumentSignature + ")" + qualifiers);
 					pw.println("{");
 
 					/* Static variable to compute the jmethodID once on first use */
