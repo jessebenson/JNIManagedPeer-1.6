@@ -1,2 +1,4 @@
-/bin/
-.classpath
+JNIManagedPeer-1.6/bin/
+JNIManagedPeer-1.6/.classpath
+JNITest/bin/
+JNITest/.classpath
