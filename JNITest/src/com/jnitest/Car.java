@@ -3,6 +3,7 @@ package com.jnitest;
 import com.jni.annotation.JNIClass;
 import com.jni.annotation.JNIMethod;
 
+// Generate a C++ managed peer class for the Java "Car" class.
 @JNIClass("JNI.Test")
 public class Car {
 
@@ -14,6 +15,7 @@ public class Car {
 		mName = name;
 	}
 
+	// Include the instance methods for getting and setting the cost in the C++ managed peer.
 	@JNIMethod
 	public double getCost() {
 		return mCost;
@@ -24,16 +26,18 @@ public class Car {
 		mCost = cost;
 	}
 
-	@JNIMethod
+	// Exclude this method from the C++ managed peer.
 	public int getWheels() {
 		return mWheels;
 	}
 
+	// Include an instance method with a more complex return type in the C++ managed peer.
 	@JNIMethod
 	public String getName() {
 		return mName;
 	}
 
+	// Include a static method in the C++ managed peer.
 	@JNIMethod
 	public static int getCount() {
 		return 10;

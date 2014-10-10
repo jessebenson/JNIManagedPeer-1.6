@@ -31,12 +31,6 @@ void CarManagedPeer::setCost(jdouble arg0) const
 	Env().CallVoidMethod(Object(), methodID, arg0);
 }
 
-jint CarManagedPeer::getWheels() const
-{
-	static jmethodID methodID(Env().GetMethodID(GetClass(), "getWheels", "()I"));
-	return Env().CallIntMethod(Object(), methodID);
-}
-
 jstring CarManagedPeer::getName() const
 {
 	static jmethodID methodID(Env().GetMethodID(GetClass(), "getName", "()Ljava/lang/String;"));

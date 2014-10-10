@@ -16,7 +16,6 @@ public:
 
 	jdouble getCost() const;
 	void setCost(jdouble arg0) const;
-	jint getWheels() const;
 	jstring getName() const;
 	static jint getCount();
 };
