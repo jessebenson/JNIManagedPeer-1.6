@@ -26,10 +26,7 @@
 
 package com.sun.tools.javah;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.ResourceBundle;
+import java.io.PrintStream;
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
 
@@ -53,51 +50,42 @@ public class Util {
         System.out.println(s);
     }
 
-
-    /*
-     * Help for loading localized messages.
-     */
-    private static ResourceBundle m;
-
-    private static void initMessages() {
-        try {
-            m=ResourceBundle.getBundle("com.sun.tools.javah.resources.l10n");
-        } catch (MissingResourceException mre) {
-            fatal("Error loading resources.  Please file a bug report.", mre);
-        }
-    }
-
     public static String getText(String key) {
         return getText(key, null, null);
     }
 
-    private static String getText(String key, String a1, String a2){
-        if (m == null)
-            initMessages();
-        try {
-            return MessageFormat.format(m.getString(key),
-                                        new Object[] { a1, a2 });
-        } catch (MissingResourceException e) {
-            fatal("Key " + key + " not found in resources.", e);
-        }
-        return null; /* dead code */
+    private static String getText(String message, String a1, String a2){
+        return MessageFormat.format(message, new Object[] { a1, a2 });
     }
 
     /*
      * Usage message.
      */
     public static void usage(int exitValue) {
-        if (exitValue == 0) {
-            System.out.println(getText("usage"));
-        } else {
-            System.err.println(getText("usage"));
-        }
+    	PrintStream out = (exitValue == 0 ? System.out : System.err);
+    	
+    	out.println("JNIManagedPeer 1.6");
+    	out.println();
+    	out.println("Usage: java -jar JNIManagedPeer.jar [options] <classes>");
+    	out.println();
+    	out.println("where [options] include:");
+    	out.println();
+    	out.println("\t-help                 Print this help message and exit");
+    	out.println("\t-classpath <path>     Path from which to load classes");
+    	out.println("\t-bootclasspath <path> Path from which to load bootstrap classes");
+    	out.println("\t-pch <file>           Precompiled header file to include in .cpp files (#include <file>)");
+    	out.println("\t-namespace <ns>       Namespace to put the C++ managed peers in (ex: My.Namespace)");
+    	out.println("\t-d <dir>              Output directory");
+    	out.println("\t-version              Print version information");
+    	out.println("\t-verbose              Enable verbose output");
+    	out.println("\t-force                Always write output files");
+    	
         System.exit(exitValue);
     }
 
     public static void version() {
-        System.out.println(getText("javah.version",
-                                   System.getProperty("java.version"), null));
+        System.out.println("JNIManagedPeer 1.6");
+        System.out.println("Java " + System.getProperty("java.version"));
         System.exit(0);
     }
 
@@ -112,7 +100,6 @@ public class Util {
         if (e != null)
             e.printStackTrace();
         System.err.println(getText(key));
-        System.err.println(getText("bug.report"));
         System.exit(11);
     }
 
@@ -128,14 +115,12 @@ public class Util {
         error(key, a1, a2, false);
     }
 
-    public static void error(String key, String a1, String a2,
-                             boolean showUsage) {
+    public static void error(String key, String a1, String a2, boolean showUsage) {
         System.err.println("Error: " + getText(key, a1, a2));
         if (showUsage)
             usage(15);
         System.exit(15);
     }
-
 
     private static void fatal(String msg) {
         fatal(msg, null);
@@ -147,46 +132,5 @@ public class Util {
         }
         System.err.println(msg);
         System.exit(10);
-    }
-
-    /*
-     * Support for platform specific things in javah, such as pragma
-     * directives, exported symbols etc.
-     */
-    static private ResourceBundle platform = null;
-
-    /*
-     * Set when platform has been initialized.
-     */
-    static private boolean platformInit = false;
-
-    static String getPlatformString(String key) {
-        if (!platformInit) {
-            initPlatform();
-            platformInit = true;
-        }
-        if (platform == null)
-            return null;
-        try {
-            return platform.getString(key);
-        } catch (MissingResourceException mre) {
-            return null;
-        }
-    }
-
-    private static void initPlatform() {
-        String os = System.getProperty("os.name");
-        if (os.startsWith("Windows")) {
-            os = "win32";
-        } else if (os.indexOf("Linux") >= 0) {
-            os = "Linux";
-        }
-        String arch = System.getProperty("os.arch");
-        String resname = "com.sun.tools.javah.resources." + os + "_" + arch;
-        try {
-            platform=ResourceBundle.getBundle(resname);
-        } catch (MissingResourceException mre) {
-            // fatal("Error loading resources.  Please file a bug report.", mre);
-        }
     }
 }

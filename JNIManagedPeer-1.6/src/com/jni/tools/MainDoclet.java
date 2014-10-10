@@ -47,7 +47,7 @@ public class MainDoclet {
 		validateOptions(cmdoptions);
 
 		if (odir == null) {
-			Util.error("err.no.dir.specified");
+			Util.error("No output directory specified.");
 		}
 
 		/*
@@ -72,7 +72,7 @@ public class MainDoclet {
 		generator.setForce(force);
 
 		if (classes.length == 0) {
-			Util.error("no.classes.specified");
+			Util.error("No classes specified.");
 		}
 
 		/*
@@ -83,9 +83,9 @@ public class MainDoclet {
 		try {
 			generator.run();
 		} catch (ClassNotFoundException cnfe) {
-			Util.error("class.not.found", cnfe.getMessage());
+			Util.error("Class not found.\n%s", cnfe.getMessage());
 		} catch (IOException ioe) {
-			Util.error("io.exception", ioe.getMessage());
+			Util.error("Exception.\n%s", ioe.getMessage());
 		}
 
 		return true;
@@ -141,12 +141,11 @@ public class MainDoclet {
 			} else if (cmdoptions[p][0].equals("-bootclasspath")) {
 				bootcp = cmdoptions[p][1];
 			} else if ((cmdoptions[p][0].charAt(0) == '-') && (!cmdoptions[p][0].equals("-private"))) {
-				Util.error("unknown.option", cmdoptions[p][0], null, true);
+				Util.error("Unknown option.\n%s", cmdoptions[p][0], null, true);
 			} else {
 				break; /* The rest must be classes. */
 			}
 		}
-
 
 		if (Util.verbose) {
 			System.err.println("[ Search Path: " + bootcp + System.getProperty("file.separator") + usercp + " ]");

@@ -95,7 +95,7 @@ public class JNIGenerator extends Gen {
 			/* Close the namespace */
 			pw.println(cppNamespaceEnd(namespace));
 		} catch (ClassNotFoundException e) {
-			Util.error("jni.sigerror", e.getMessage());
+			Util.error("Class not found.\n%s", e.getMessage());
 		}
 	}
 
@@ -176,14 +176,14 @@ public class JNIGenerator extends Gen {
 			/* Close the namespace */
 			pw.println(cppNamespaceEnd(namespace));
 		} catch (ClassNotFoundException e) {
-			Util.error("jni.sigerror", e.getMessage());
+			Util.error("Class not found.\n%s", e.getMessage());
 		}
 	}
 
 	protected final String[] getNamespace(ClassDoc clazz) throws ClassNotFoundException {
 		AnnotationTypeDoc jniClass = getAnnotation(clazz, JNIClass.class);
 		if (jniClass == null)
-			Util.bug("tried.to.define.non.annotated.class");
+			Util.bug("Tried to define non annotated class.");
 
 		for (AnnotationTypeElementDoc element : jniClass.elements()) {
 			// How do I read the value out of this?
@@ -338,7 +338,7 @@ public class JNIGenerator extends Gen {
 			}
 		}
 
-		Util.bug("jni.unknown.type");
+		Util.bug("Unknown JNI type.");
 		return null; /* dead code. */
 	}
 }

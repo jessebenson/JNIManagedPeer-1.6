@@ -99,7 +99,7 @@ public abstract class Gen {
 			File d = new File(outDir);
 			if (!d.exists()) {
 				if (!d.mkdirs())
-					Util.error("cant.create.dir", d.toString());
+					Util.error("Failed to create directory: %s", d.toString());
 			}
 		}
 	}
@@ -133,7 +133,7 @@ public abstract class Gen {
 		try {
 			return new PrintWriter(new OutputStreamWriter(o, "ISO8859_1"), true);
 		} catch (UnsupportedEncodingException use) {
-			Util.bug("encoding.iso8859_1.not.found");
+			Util.bug("Encoding ISO 8859.1 not found.");
 			return null; /* dead code */
 		}
 	}
@@ -220,7 +220,7 @@ public abstract class Gen {
 					if (in.read(a) != l) {
 						in.close();
 						/* This can't happen, we already checked the length. */
-						Util.error("not.enough.bytes", Integer.toString(l), f.toString());
+						Util.error("Not enough bytes (%s) in file %s", Integer.toString(l), f.toString());
 					}
 					in.close();
 					while (--l >= 0) {
@@ -250,7 +250,7 @@ public abstract class Gen {
 		String fname = Mangle.mangle(fnamedoc, Mangle.Type.FIELDSTUB);
 
 		if (!f.isStatic())
-			Util.bug("tried.to.define.non.static");
+			Util.bug("Tried to define non static field");
 
 		if (f.isFinal()) {
 			Object value = null;

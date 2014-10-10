@@ -39,13 +39,13 @@ public class Main {
 				if (i >= args.length) {
 					Util.usage(1);
 				} else if (args[i].charAt(0) == '-') {
-					Util.error("no.outputdir.specified");
+					Util.error("Missing output directory in -d commandline parameter.");
 				} else if ((i+1) >= args.length) {
-					Util.error("no.classes.specified");
+					Util.error("No classes specified on the commandline.");
 				}
 			} else if (args[i].equals("-v") || args[i].equals("-verbose")) {
 				if ((i+1) >= args.length) {
-					Util.error("no.classes.specified");
+					Util.error("No classes specified on the commandline.");
 				}
 				args[i] = "-verbose";
 			} else if ((args[i].equals("-help")) || (args[i].equals("--help")) || (args[i].equals("-?")) || (args[i].equals("-h"))) {
@@ -57,41 +57,41 @@ public class Main {
 			} else if (args[i].equals("-pch")) {
 				i++;
 				if ((i+1) >= args.length) {
-					Util.error("no.classes.specified");
+					Util.error("No classes specified on the commandline.");
 				}
 				MainDoclet.pch = args[i];
 				continue;
 			} else if (args[i].equals("-namespace")) {
 				i++;
 				if ((i+1) >= args.length) {
-					Util.error("no.classes.specified");
+					Util.error("No classes specified on the commandline.");
 				}
 				MainDoclet.namespace = args[i];
 				continue;
 			} else if (args[i].equals("-force")) {
 				if ((i+1) >= args.length) {
-					Util.error("no.classes.specified");
+					Util.error("No classes specified on the commandline.");
 				}
 			} else if (args[i].equals("-classpath")) {
 				i++;
 				if (i >= args.length) {
 					Util.usage(1);
 				} else if (args[i].charAt(0) == '-') {
-					Util.error("no.classpath.specified");
+					Util.error("Missing classpath arguments in the -classpath commandline parameter.");
 				} else if ((i+1) >= args.length) {
-					Util.error("no.classes.specified");
+					Util.error("No classes specified on the commandline.");
 				}
 			} else if (args[i].equals("-bootclasspath")) {
 				i++;
 				if (i >= args.length) {
 					Util.usage(1);
 				} else if (args[i].charAt(0) == '-') {
-					Util.error("no.bootclasspath.specified");
+					Util.error("Missing classpath arguments in the -bootclasspath commandline parameter.");
 				} else if ((i+1) >= args.length) {
-					Util.error("no.classes.specified");
+					Util.error("No classes specified on the commandline.");
 				}
 			} else if (args[i].charAt(0) == '-') {
-				Util.error("unknown.option", args[i], null, true);
+				Util.error("Unknown option: %s", args[i], null, true);
 			} else {
 				//break; /* The rest must be classes. */
 			}
