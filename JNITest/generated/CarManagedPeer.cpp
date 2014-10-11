@@ -39,8 +39,8 @@ jstring CarManagedPeer::getName() const
 
 jint CarManagedPeer::getCount()
 {
-	static jmethodID methodID(Env().GetMethodID(GetClass(), "getCount", "()I"));
-	return Env().CallStaticIntMethod(methodID);
+	static jmethodID methodID(Env().GetStaticMethodID(GetClass(), "getCount", "()I"));
+	return Env().CallStaticIntMethod(GetClass(), methodID);
 }
 
 }} // namespace JNI.Test
