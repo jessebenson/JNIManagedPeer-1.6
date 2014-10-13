@@ -4,6 +4,10 @@
 
 namespace JNI { namespace Test { 
 
+CarManagedPeer::CarManagedPeer()
+{
+}
+
 CarManagedPeer::CarManagedPeer(jobject object)
 	: ::JNI::ManagedPeer(object)
 {

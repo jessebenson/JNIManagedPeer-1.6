@@ -9,8 +9,11 @@ namespace JNI { namespace Test {
 class CarManagedPeer : public ::JNI::ManagedPeer
 {
 public:
+	CarManagedPeer();
 	explicit CarManagedPeer(jobject object);
 	~CarManagedPeer();
+
+	CarManagedPeer& operator=(jobject object) { ::JNI::ManagedPeer::operator=(object); return *this; }
 
 	static jclass GetClass();
 
